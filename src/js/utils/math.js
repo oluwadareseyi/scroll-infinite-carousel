@@ -1,4 +1,4 @@
-import GSAP from 'gsap'
+// import GSAP from 'gsap'
 
 export function lerp (p1, p2, t) {
   return p1 + (p2 - p1) * t
@@ -20,6 +20,6 @@ export function random (min, max) {
   return Math.random() * (max - min) + min
 }
 
-export function delay (ms) {
-  return new Promise(res => GSAP.delayedCall(ms / 1000, res))
-}
+// export function delay (ms) {
+//   return new Promise(res => GSAP.delayedCall(ms / 1000, res))
+// }
