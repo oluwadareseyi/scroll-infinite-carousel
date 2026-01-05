@@ -35,6 +35,7 @@ const marquee = new Marquee({
     list,
     items,
     main,
+    preview,
     previewIndex,
   },
 });

@@ -120,9 +120,13 @@ export default class {
   }
 
   setPreview(element) {
+    const previewConainerHeight = getOffset(this.elements.preview).height - 60;
+    const previewIndexHeight = getOffset(this.elements.previewIndex).height;
     const index = [...this.elements.items].indexOf(element);
     this.elements.main.src = element.querySelector("img").src;
     this.elements.previewIndex.textContent = `${index + 1}`.padStart(3, "0");
+    const offset = (previewConainerHeight - previewIndexHeight) / this.elements.items.length + 1;
+    this.elements.previewIndex.style.transform = `translateY(${offset * index}px)`;
   }
 
   onResize() {
