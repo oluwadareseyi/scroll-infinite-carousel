@@ -102,6 +102,14 @@ export default class {
 
   transform(element, x) {
     element.style[this.transformPrefix] = `translate3d(${Math.floor(x)}px, 0, 0)`;
+
+
+    const offset = getOffset(element);
+    if (offset.left < 10) {
+      const index = [...this.elements.items].indexOf(element);
+      this.elements.main.src = element.querySelector("img").src;
+      this.elements.previewIndex.textContent = `${index + 1}`.padStart(3, "0");
+    }
   }
 
   onResize() {
