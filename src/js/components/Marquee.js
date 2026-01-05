@@ -1,8 +1,9 @@
 import AutoBind from "../utils/bind";
 import Prefix from "prefix";
 import { getOffset, mapEach } from "../utils/dom";
-import { lerp } from "../utils/math";
+import { lerp, clamp, } from "../utils/math";
 import NormalizeWheel from "normalize-wheel";
+import gsap from "gsap";
 
 export default class {
   constructor({ element, elements }) {
@@ -30,6 +31,11 @@ export default class {
       element.width = offset.width;
       element.offset = offset.left;
       element.position = 0;
+      element.distortion = {
+        current: 0,
+        target: 0,
+        ease: 0.1
+      };
     });
 
     this.length = this.elements.items.length;
@@ -101,15 +107,22 @@ export default class {
   }
 
   transform(element, x) {
+    if (Math.round(this.scroll.current) === Math.round(this.scroll.last)) return;
+
     element.style[this.transformPrefix] = `translate3d(${Math.floor(x)}px, 0, 0)`;
 
 
     const offset = getOffset(element);
+
     if (offset.left < 10) {
-      const index = [...this.elements.items].indexOf(element);
-      this.elements.main.src = element.querySelector("img").src;
-      this.elements.previewIndex.textContent = `${index + 1}`.padStart(3, "0");
+      this.setPreview(element);
     }
+  }
+
+  setPreview(element) {
+    const index = [...this.elements.items].indexOf(element);
+    this.elements.main.src = element.querySelector("img").src;
+    this.elements.previewIndex.textContent = `${index + 1}`.padStart(3, "0");
   }
 
   onResize() {
@@ -160,6 +173,34 @@ export default class {
     document.addEventListener("wheel", this.onWheel, {
       passive: true,
     });
+
+    const rangeValue = 200;
+
+    this.elements.list.addEventListener("mousemove", e => {
+      this.elements.items.forEach((element, index) => {
+        const rect = element.getBoundingClientRect();
+        const dx = e.clientX - (rect.left + rect.width / 2);
+        const distance = Math.sqrt(dx * dx);
+
+        const value = rangeValue - clamp(-rangeValue, rangeValue, distance);
+        const topPercent = gsap.utils.mapRange(0, rangeValue, 0, 18, value);
+
+        element.distortion.target = topPercent;
+      });
+    })
+
+    this.elements.list.addEventListener("mouseleave", () => {
+      this.elements.items.forEach((element, index) => {
+        element.distortion.target = 0;
+      });
+    })
+
+    this.elements.items.forEach((element, index) => {
+      element.addEventListener("click", (e) => {
+        e.preventDefault();
+        this.setPreview(e.currentTarget);
+      })
+    })
   }
 
   update() {
@@ -210,6 +251,20 @@ export default class {
       }
 
       element.clamp = element.extra % scrollClamp;
+
+      element.distortion.current = lerp(
+        element.distortion.current,
+        element.distortion.target,
+        element.distortion.ease
+      );
+
+      const topPercent = element.distortion.current;
+      const bottomPercent = 100 - topPercent;
+
+      element.style.setProperty("--top-left-y", `${topPercent}%`);
+      element.style.setProperty("--top-right-y", `${topPercent}%`);
+      element.style.setProperty("--bottom-right-y", `${bottomPercent}%`);
+      element.style.setProperty("--bottom-left-y", `${bottomPercent}%`);
 
       this.transform(element, element.position);
     });

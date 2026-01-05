@@ -61,6 +61,11 @@ body {
     width: 72px;
     height: 72px;
     margin: 0 4px;
+    --top-left-y: 0%;
+    --top-right-y: 0%;
+    --bottom-right-y: 100%;
+    --bottom-left-y: 100%;
+    cursor: pointer;
 
     &.wide {
       width: 96px;
@@ -77,6 +82,7 @@ body {
       object-fit: cover;
       pointer-events: none;
       user-select: none;
+      clip-path: polygon(0 var(--top-left-y),100% var(--top-right-y),100% var(--bottom-right-y),0 var(--bottom-left-y));
     }
   }
 }
